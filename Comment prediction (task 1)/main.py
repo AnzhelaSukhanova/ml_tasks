@@ -84,18 +84,23 @@ def get_folds(train_data):
 
 def get_stats(fold, ground_truth, weights):
     error_sum = 0
-    errors = []
+    dev_sum = 0
+    gt_mean = ground_truth.mean()
+    predictions = []
+
     for k, row in fold.iterrows():
         pred = predict(row, weights)
         error = pred - ground_truth[k]
         error_sum += error ** 2
-        errors.append(error)
+        dev_sum += (ground_truth[k] - gt_mean) ** 2
+        predictions.append(pred)
 
     n = fold.shape[0]
+    R2 = 1 - (error_sum / dev_sum)
     rmse = math.sqrt(error_sum / n)
-    average = mean(errors)
-    D = variance(errors)
-    return rmse, average, D
+    pred_mean = mean(predictions)
+    D = variance(predictions)
+    return R2, rmse, pred_mean, D
 
 
 def main(argv):
@@ -103,10 +108,10 @@ def main(argv):
 
     variants_num = 2 if len(argv) < 2 else argv[1]
 
-    for i in range(1, variants_num):
-        print('\nVariant: ' + str(i))
+    for k in range(1, variants_num):
+        print('\nVariant: ' + str(k))
         train_data = pd.read_csv('Dataset/Training/Features_Variant_' +
-                                 str(i) + '.csv', header=None)
+                                 str(k) + '.csv', header=None)
 
         feature_num = train_data.shape[1] - 1
         train_data = normalize(train_data)
@@ -117,15 +122,19 @@ def main(argv):
         stats = pd.DataFrame(index=range(5), columns=['F1', 'F2', 'F3', 'F4', 'F5', 'weights'])
         for i in range(fold_num):
             weights = sgd(folds, ground_truth, i)
-            stats.iloc[i, 5] = weights
+            w_str = str(weights[0])
+            for j in range(1, len(weights)):
+                w_str += '\n' + str(weights[j])
+            stats.iloc[i, 5] = w_str
             for j in range(fold_num):
                 fold_stats = 'Train:\n' if j != i else 'Test:\n'
-                rmse, mean, D = get_stats(folds[j], ground_truth[j], weights)
+                R2, rmse, mean, D = get_stats(folds[j], ground_truth[j], weights)
+                fold_stats += 'R^2: ' + str(R2) + '\n'
                 fold_stats += 'RMSE: ' + str(rmse) + '\n'
                 fold_stats += 'Mean: ' + str(mean) + '\n'
                 fold_stats += 'Variance: ' + str(D)
                 stats.iloc[i, j] = fold_stats
-        print(tabulate(stats, headers='keys', tablefmt='psql'))
+        print(tabulate(stats, headers='keys', tablefmt='grid'))
 
 
 if __name__ == '__main__':
