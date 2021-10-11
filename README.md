@@ -9,4 +9,4 @@ Predict how many comments a post will receive. The task involves the implementat
 * R^2 and RMSE calculation.  
 
 Local run: `python main.py <number of data variants>`  
-You can also look at the sgd.ipynb. 
+You can also look at the comm_pred.ipynb. 
