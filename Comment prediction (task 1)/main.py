@@ -86,21 +86,21 @@ def get_stats(fold, ground_truth, weights):
     error_sum = 0
     dev_sum = 0
     gt_mean = ground_truth.mean()
-    predictions = []
+    errors = []
 
     for k, row in fold.iterrows():
         pred = predict(row, weights)
         error = pred - ground_truth[k]
         error_sum += error ** 2
         dev_sum += (ground_truth[k] - gt_mean) ** 2
-        predictions.append(pred)
+        errors.append(error)
 
     n = fold.shape[0]
     R2 = 1 - (error_sum / dev_sum)
     rmse = math.sqrt(error_sum / n)
-    pred_mean = mean(predictions)
-    D = variance(predictions)
-    return R2, rmse, pred_mean, D
+    err_mean = mean(errors)
+    D = variance(errors)
+    return R2, rmse, err_mean, D
 
 
 def main(argv):
