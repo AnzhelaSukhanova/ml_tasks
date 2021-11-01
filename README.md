@@ -10,3 +10,10 @@ Predict how many comments a post will receive. The task involves the implementat
 
 Local run: `python main.py <number of data variants>`  
 You can also look at the comm_pred.ipynb. 
+
+### Task 3
+**Dataset**: https://snap.stanford.edu/data/loc-Gowalla.html.  
+Find clusters on the user graph using the Affinity Propagation method. Compare the effectiveness of these clusters in the task of recommending places.  
+
+Local run: `python cluster.py`  
+
